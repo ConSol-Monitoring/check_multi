@@ -4201,7 +4201,7 @@ sub report_all {
 
 	#--- some debugging first
 	DEBUG4("MULTI Environment (sorted):\n\t".join("\n\t",get_env_vars('^MULTI')));
-	DEBUG4("${NAGIOS} Environment (sorted):\n\t".join("\n\t",get_env_vars("^$\{NAGIOS\}")));
+	DEBUG4("${NAGIOS} Environment (sorted):\n\t".join("\n\t",get_env_vars("^${NAGIOS}")));
 
 	#--- construction site for persistence
 	if ($opt{set}{test} && $opt{set}{persistent}) {
