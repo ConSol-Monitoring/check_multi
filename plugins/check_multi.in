@@ -3182,9 +3182,6 @@ sub expand_livestatus_service {
 	DEBUG4("$#{$livestatus_service} results");
 
 	#--- expand simple tokens to REGEX, if necessary
-	$host_name=~s/^[\"\']+//;
-	$host_name=~s/[\"\']*$//;
-	$host_name=($host_name=~/\/(.*)\//)?$1:'^'.$host_name.'$';
 	$service_description=~s/^["']+//;
 	$service_description=~s/["']+//;
 	$service_description=($service_description=~/\/(.*)\//)?$1:'^'.$service_description.'$';
@@ -3193,7 +3190,7 @@ sub expand_livestatus_service {
 	my @result=();
 	#--- $service points to an array item
 	foreach my $service (@{$livestatus_service}) {
-		if ($service->{host_name}=~/$host_name/ && $service->{description}=~/$service_description/) {
+		if ($service->{description}=~/$service_description/) {
 			push @result,$service->{host_name};
 			push @result,$service->{description};
 			push @result,$service->{state};
