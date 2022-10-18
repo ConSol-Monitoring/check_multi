@@ -3237,20 +3237,23 @@ sub expand_livestatus_host {
 		add_error(0,"expand_livestatus_host: empty host_name=$host_name specified");
 		return (undef,undef);
 	}
+	#--- expand simple tokens to REGEX, if necessary
+	$host_name=~s/^[\"\']+//;
+	$host_name=~s/[\"\']*$//;
+	$host_name=($host_name=~/\/(.*)\//)?$1:'^'.$host_name.'$';
+	DEBUG4("$host_name after REGEX preparation");
+
 	$livestatus_query = "GET hosts\nColumns: host_name last_hard_state plugin_output long_plugin_output perf_data check_command\nFilter: host_name ~ ".$host_name."\n";
 	if (!$opt{set}{ignore_downtime}) {
 		$livestatus_query = $livestatus_query."Filter: scheduled_downtime_depth = 0\nFilter: host_scheduled_downtime_depth = 0\n";
 	}
-	$livestatus_service=read_livestatus($livestatus_path, $livestatus_query);
+	$livestatus_host=read_livestatus($livestatus_path, $livestatus_query);
 	if (!$livestatus_host) {
 		add_error(0,"expand_livestatus_host: could not read $livestatus_path");
 		return (undef,undef);
 	}
 	DEBUG4("$#{$livestatus_host} results");
 
-	#--- expand simple tokens to REGEX, if necessary
-	$host_name=($host_name=~/\/(.*)\//)?$1:'^'.$host_name.'$';
-	DEBUG4("$host_name after REGEX preparation");
 
 	my @result=();
 	#--- $host points to an array item
