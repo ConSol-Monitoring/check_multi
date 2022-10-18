@@ -3177,7 +3177,7 @@ sub expand_livestatus_service {
 		add_error(0,"expand_livestatus_service: empty host_name=$host_name or service_description=$service_description specified");
 		return (undef,undef);
 	}
-	$livestatus_query = "GET services\nColumns: host_name description state last_hard_state plugin_output long_plugin_output perf_data check_command\nFilter: host_name ~ ".$host_name."\n");
+	$livestatus_query = "GET services\nColumns: host_name description state last_hard_state plugin_output long_plugin_output perf_data check_command\nFilter: host_name ~ ".$host_name."\n";
 	if (!$opt{set}{ignore_downtime}) {
 		$livestatus_query = $livestatus_query."Filter: scheduled_downtime_depth = 0\nFilter: host_scheduled_downtime_depth = 0\n"
 	}
