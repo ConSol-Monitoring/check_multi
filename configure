@@ -274,7 +274,7 @@ PACKAGE_STRING='check_multi 0.26'
 PACKAGE_BUGREPORT='matthias.flacke@gmx.de'
 
 ac_default_prefix=/usr/local/nagios
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS PKG_NAME PKG_VERSION PKG_AUTHOR PKG_HOME_URL PKG_REL_DATE PKG_ID COMMA SET_MAKE CHMOD CP ETHTOOL GUNZIP ID INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA MAILX PERL client_perl INSTALL INSTALL_OPTS LIBEXECDIR ac_configure_args action_mouseover action_url add_tag_to_list_entries cancel_before_global_timeout child_interval checkresults_dir child_timeout cmdfile_update_interval collapse complain_unknown_macros contrib_dir config_dir cumulate_ignore_zero cumulate_max_rows datarootdir empty_output_is_unknown ethtool exec_open3 extinfo_in_status extended_perfdata feed_passive_autocreate feed_passive_dir feed_passive_dir_permissions findbin file_extension gunzip history history_maxsize history_maxage history_minvalues history_non_numerical_value html_ascii_notification hostname ignore_missing_cmd_file illegal_chars image_path indent_label indent livestatus loose_perfdata map_host_down_state_to map_host_unreachable_state_to name no_checks_rc objects_cache objects_cache_delimiter omd_environment nagios_name notes_url parent_timeout perfdata_pass_through persistent plugin_path pnp_version pnp_add2url pnp_url report report_inherit_mask service_definition_template signal_rc snmp_community snmp_port status_dat style_plus_minus tag_notes_link target tmp_dir tmp_dir_permissions tmp_etc use_hard_state verbose verbose_fields LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS PKG_NAME PKG_VERSION PKG_AUTHOR PKG_HOME_URL PKG_REL_DATE PKG_ID COMMA SET_MAKE CHMOD CP ETHTOOL GUNZIP ID INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA MAILX PERL client_perl INSTALL INSTALL_OPTS LIBEXECDIR ac_configure_args action_mouseover action_url add_tag_to_list_entries cancel_before_global_timeout child_interval checkresults_dir child_timeout cmdfile_update_interval collapse complain_unknown_macros contrib_dir config_dir cumulate_ignore_zero cumulate_max_rows datarootdir empty_output_is_unknown ethtool exec_open3 extinfo_in_status extended_perfdata feed_passive_autocreate feed_passive_dir feed_passive_dir_permissions findbin file_extension gunzip history history_maxsize history_maxage history_minvalues history_non_numerical_value html_ascii_notification hostname ignore_downtime ignore_missing_cmd_file illegal_chars image_path indent_label indent livestatus loose_perfdata map_host_down_state_to map_host_unreachable_state_to name no_checks_rc objects_cache objects_cache_delimiter omd_environment nagios_name notes_url parent_timeout perfdata_pass_through persistent plugin_path pnp_version pnp_add2url pnp_url report report_inherit_mask service_definition_template signal_rc snmp_community snmp_port status_dat style_plus_minus tag_notes_link target tmp_dir tmp_dir_permissions tmp_etc use_hard_state verbose verbose_fields LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -819,6 +819,7 @@ detail settings:
   --with-history_minvalues=<NN>            minimum of history entries, until a state rule gets valid (default: 3)
   --with-history_non_numerical_value=<complain,extract> what shall be done with non numerical values? (default: complain)
   --with-html_ascii_notification=<0|1>     HTML output contains comment with ASCII output for notifications (default:0)
+  --with-ignore_downtime=<0|1>             ignore hosts and service in downtime at livestatus query, (default:0)
   --with-ignore_missing_cmd_file=<0|1>     if missing cmd files should be ignored (default:0)
   --with-illegal_chars=<chars>             characters to be stripped from command files (default:"\r")
   --with-image_path=<URL>                  relative URL to nagios images (default:"/nagios/images")
@@ -2044,6 +2045,14 @@ else
   html_ascii_notification=0
 fi;
 
+# Check whether --with-ignore_downtime or --without-ignore_downtime was given.
+if test "${with_ignore_downtime+set}" = set; then
+  withval="${with_ignore_downtime}"
+  ignore_downtime=$withval
+else
+  ignore_downtime="0"
+fi;
+
 # Check whether --with-ignore_missing_cmd_file or --without-ignore_missing_cmd_file was given.
 if test "${with_ignore_missing_cmd_file+set}" = set; then
   withval="$with_ignore_missing_cmd_file"
@@ -3149,6 +3158,7 @@ s,@history_minvalues@,$history_minvalues,;t t
 s,@history_non_numerical_value@,$history_non_numerical_value,;t t
 s,@html_ascii_notification@,$html_ascii_notification,;t t
 s,@hostname@,$hostname,;t t
+s,@ignore_downtime@,$ignore_downtime,;t t
 s,@ignore_missing_cmd_file@,$ignore_missing_cmd_file,;t t
 s,@illegal_chars@,$illegal_chars,;t t
 s,@image_path@,$image_path,;t t
