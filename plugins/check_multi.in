@@ -24,7 +24,7 @@ use strict;
 use Getopt::Long;
 use vars qw(
 $MYSELF @cmds %opt $returncode %def %rc $no $VERSION $tmp_stdout $tmp_stderr $xml $check_multi
-$NAGIOS $nagios $Nagios $status_dat $livestatus_service $livestatus_host $timezero
+$NAGIOS $nagios $Nagios $status_dat $livestatus_query $livestatus_service $livestatus_host $timezero
 $OK $WARNING $CRITICAL $UNKNOWN $DOWN $UNREACHABLE
 $DETAIL_LIST $DETAIL_LIST_FULL $DETAIL_HTML $DETAIL_STDERR $DETAIL_PERFORMANCE
 $DETAIL_PERFORMANCE_CLASSIC $DETAIL_STATUS $DETAIL_PERFORMANCE_LINK $DETAIL_XML $DETAIL_NAGIOS2
@@ -195,6 +195,8 @@ my %opt=(
 		html_ascii_notification => @html_ascii_notification@,
 		# if set, return UNKNOWN if command file is not found
 		ignore_missing_cmd_file => @ignore_missing_cmd_file@,
+		# if set, Host / Services in downtime will be ignored (on livestatus)
+		ignore_downtime => @ignore_downtime@,
 		# characters to cleanup from command files
 		illegal_chars	=> "@illegal_chars@",
 		# path to Nagios images
@@ -923,6 +925,7 @@ Set options:
    history_maxage=<sec> - maximum age of history entries (in seconds), default:$opt{set}{history_maxage}
    history_minvalues=<number> - minimum number of history values, otherwise return UNKNOWN result, default:$opt{set}{history_minvalues}
    history_non_numerical_value=<complain,extract> - what to do in case of non numerical values? default:$opt{set}{history_non_numerical_value}
+   ignore_downtime=<0|1> - ignore hosts and service in downtime at livestatus query, default:$opt{set}{ignore_downtime}
    ignore_missing_cmd_file=<0|1> - do not complain if config file missing, default:$opt{set}{ignore_missing_cmd_file}
    illegal_chars=<characters> - specify characters to cleanup from command files
    image_path=</path/to/imagefiles> - relative path to Nagios imagefiles: default:$opt{set}{image_path}
@@ -1492,7 +1495,7 @@ sub set_env_vars {
 
 	DEBUG4(
 		sprintf "environment vars set\n".
-      "1. MULTI_$name=%s\n".
+        "1. MULTI_$name=%s\n".
 		"2. MULTI_STATE_$name=%s\n".
 		"3. MULTI_ERROR_$name=%s\n".
 		"4. MULTI_LABEL_$name=%s\n".
@@ -3174,7 +3177,11 @@ sub expand_livestatus_service {
 		add_error(0,"expand_livestatus_service: empty host_name=$host_name or service_description=$service_description specified");
 		return (undef,undef);
 	}
-	$livestatus_service=read_livestatus($livestatus_path,"GET services\nColumns: host_name description state last_hard_state plugin_output long_plugin_output perf_data check_command\nFilter: host_name ~ ".$host_name."\nFilter: scheduled_downtime_depth = 0\nFilter: host_scheduled_downtime_depth = 0\n");
+	$livestatus_query = "GET services\nColumns: host_name description state last_hard_state plugin_output long_plugin_output perf_data check_command\nFilter: host_name ~ ".$host_name."\n");
+	if (!$opt{set}{ignore_downtime}) {
+		$livestatus_query = $livestatus_query."Filter: scheduled_downtime_depth = 0\nFilter: host_scheduled_downtime_depth = 0\n"
+	}
+	$livestatus_service=read_livestatus($livestatus_path, $livestatus_query)
 	if (!$livestatus_service) {
 		add_error(0,"expand_livestatus_service: could not read $livestatus_path");
 		return (undef,undef);
@@ -3226,7 +3233,11 @@ sub expand_livestatus_host {
 		add_error(0,"expand_livestatus_host: empty host_name=$host_name specified");
 		return (undef,undef);
 	}
-	$livestatus_host=read_livestatus($livestatus_path,"GET hosts\nColumns: host_name last_hard_state plugin_output long_plugin_output perf_data check_command\nFilter: host_name ~ ".$host_name."\nFilter: scheduled_downtime_depth = 0\n");
+	$livestatus_query = "GET hosts\nColumns: host_name last_hard_state plugin_output long_plugin_output perf_data check_command\nFilter: host_name ~ ".$host_name."\n"
+	if (!$opt{set}{ignore_downtime}) {
+		$livestatus_query = $livestatus_query."Filter: scheduled_downtime_depth = 0\nFilter: host_scheduled_downtime_depth = 0\n"
+	}
+	$livestatus_service=read_livestatus($livestatus_path, $livestatus_query)
 	if (!$livestatus_host) {
 		add_error(0,"expand_livestatus_host: could not read $livestatus_path");
 		return (undef,undef);
